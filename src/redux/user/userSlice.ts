@@ -10,6 +10,12 @@ interface IUpdateUser {
     email: string,
 }
 
+interface IDeleteUser {
+    id: any,
+    name: string,
+    email: string
+}
+
 // First, create the thunk
 export const fetchListUser = createAsyncThunk( // createAsyncThunk Giải quyết bất đồng bộ
     'users/fetchListUser',  // Tên để kiểm soát khi gọi API: Sinh ra 3 trạng thái
@@ -58,14 +64,33 @@ export const updateUser = createAsyncThunk(
                 email: payload.email,
             })
         });
-
+     
         const data = await res.json();
-        
+
         if (data && data.id) {
             thunkAPI.dispatch(fetchListUser());
         }
+        
         return data;
     },
+)
+
+export const deleteUser = createAsyncThunk(
+    'users/deleteUser',
+    async (payload: IDeleteUser, thunkAPI) => {
+        const res = await fetch(`http://localhost:8000/users/${payload.id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+        
+        const data = await res.json();
+            
+        thunkAPI.dispatch(fetchListUser());
+        
+        return data;
+    }
 )
 
 interface IUser {
@@ -77,11 +102,13 @@ interface IUser {
 const initialState: {
     listUser: IUser[],
     isCreateSuccess: boolean,
-    isUpdateSuccess: boolean
+    isUpdateSuccess: boolean,
+    isDeleteSuccess: boolean
 } = {
     listUser: [],
     isCreateSuccess: false,
-    isUpdateSuccess: false
+    isUpdateSuccess: false,
+    isDeleteSuccess: false
 }
 
 export const userSlice = createSlice({
@@ -93,6 +120,9 @@ export const userSlice = createSlice({
         },
         resetUpdate(state) {
             state.isUpdateSuccess = false;
+        },
+        resetDelete(state) {
+            state.isDeleteSuccess = false;
         }
     },
     // Có liên quan đến API mới dùng
@@ -111,8 +141,12 @@ export const userSlice = createSlice({
         builder.addCase(updateUser.fulfilled, (state) => {
             state.isUpdateSuccess = true;
         })
+
+        builder.addCase(deleteUser.fulfilled, (state) => {
+            state.isDeleteSuccess = true;
+        })
     },
 })
 
-export const { resetCreate, resetUpdate } = userSlice.actions
+export const { resetCreate, resetUpdate, resetDelete } = userSlice.actions
 export default userSlice.reducer

@@ -10,10 +10,14 @@ import Button from "react-bootstrap/Button";
 function UsersTable() {
     const dispatch = useAppDispatch();
     const users = useAppSelector((state) => state.user.listUser);
+
     const [selectedUser, setSelectedUser] = useState<object | null>(null);
     
     const [show, setShow] = useState(false);
+    const [showModelDelete, setShowModelDelete] = useState(false);
+    
     const handleClose = () => setShow(false);
+    const handleCloseModelDelete = () => setShowModelDelete(false);
 
     useEffect(() => {
         dispatch(fetchListUser())
@@ -22,6 +26,11 @@ function UsersTable() {
     const handleEditClick = (user: any) => {
         setSelectedUser(user);
         setShow(true);
+    };
+
+    const handleDeleteClick = (user: any) => {
+        setSelectedUser(user);
+        setShowModelDelete(true);
     };
     
     return (
@@ -48,7 +57,13 @@ function UsersTable() {
                                 >
                                     Edit
                                 </Button>
-                                <UserDeleteModel />
+                                <Button
+                                    variant='danger'
+                                    onClick={() => handleDeleteClick(user)}
+                                    className="ms-3"
+                                >
+                                    Delete
+                                </Button>
                             </td>
                         </tr>
                     ))}
@@ -56,6 +71,8 @@ function UsersTable() {
             </Table>
     
             <UserEditModel show={show} dataUser={selectedUser} handleClose={handleClose}/>
+            
+            <UserDeleteModel show={showModelDelete} dataUser={selectedUser} handleClose={handleCloseModelDelete} />
         </>
     );
 }
